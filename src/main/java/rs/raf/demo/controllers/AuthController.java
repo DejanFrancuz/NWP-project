@@ -4,12 +4,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import rs.raf.demo.requests.LoginRequest;
 import rs.raf.demo.responses.LoginResponse;
 import rs.raf.demo.services.UserService;
 import rs.raf.demo.utils.JwtUtil;
+
+import java.util.Collection;
 //import rs.edu.raf.spring_project.model.AuthReq;
 //import rs.edu.raf.spring_project.model.AuthRes;
 
@@ -30,16 +33,22 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
+
+        UserDetails userDetails = userService.loadUserByUsername(loginRequest.getUsername());
+        //UserDetails userDetails = userService.loadUserByEmail(loginRequest.getUsername());
+        Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
+
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+
+
+
         } catch (Exception   e){
             e.printStackTrace();
             return ResponseEntity.status(401).build();
         }
-
-        UserDetails userDetails = userService.loadUserByUsername(loginRequest.getUsername());
-
-        return ResponseEntity.ok(new LoginResponse(jwtUtil.generateToken(userDetails)));
+        //return ResponseEntity;
+        return ResponseEntity.ok(new LoginResponse(jwtUtil.generateToken(loginRequest.getUsername(), authorities)));
     }
 
 }
