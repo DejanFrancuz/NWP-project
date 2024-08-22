@@ -21,7 +21,7 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
 
     @Transactional
     @Modifying
-    @Query("UPDATE Machine m SET m.status = 'STOPPED' , m.ciclusCount = m.ciclusCount + 1 WHERE m.id = :machineId")
+    @Query("UPDATE Machine m SET m.status = 'STOPPED' WHERE m.id = :machineId")
     void updateMachineStatusToStopped(Long machineId);
 
     @Transactional
@@ -29,10 +29,10 @@ public interface MachineRepository extends JpaRepository<Machine, Long> {
     @Query("UPDATE Machine m SET m.status = 'DISCHARGING' WHERE m.id = :machineId")
     void updateMachineStatusToDischarged(Long machineId);
 
-//    @Transactional
-//    @Modifying
-//    @Query("UPDATE Machine m SET m.ciclusCount = :ciclusCount WHERE m.id = :machineId")
-//    void updateMachineCiclusCount(Long machineId, Long ciclusCount);
+    @Transactional
+    @Modifying
+    @Query("UPDATE Machine m SET m.ciclusCount = :ciclusCount WHERE m.id = :machineId")
+    void updateMachineCiclusCount(Long machineId, Integer ciclusCount);
 
 
     @Query("SELECT m FROM Machine m WHERE LOWER(m.name) LIKE LOWER(CONCAT('%', :name, '%')) AND m.status IN (:status) AND m.dateCreated >= :dateFrom AND m.dateCreated <= :dateTo")

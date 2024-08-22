@@ -117,10 +117,4 @@ public class MachineController {
             machine.setCreatedBy(realUser);
         }
     }
-
-    public Date convertStringToDate(String dateString) {
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-        LocalDateTime localDateTime = LocalDateTime.parse(dateString, formatter);
-        return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-    }
 }

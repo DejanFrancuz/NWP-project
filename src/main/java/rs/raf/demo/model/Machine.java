@@ -1,5 +1,6 @@
 package rs.raf.demo.model;
 
+import com.sun.istack.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import rs.raf.demo.enums.MachineStatus;
@@ -35,7 +36,8 @@ public class Machine {
     private Boolean active;
 
     @Column
-    private Long ciclusCount;
+    @NotNull
+    private Integer ciclusCount;
 
     @Column
     private Boolean deleted;
@@ -50,7 +52,7 @@ public class Machine {
         this.name = name;
         this.deleted = false;
         this.dateCreated = new Date();
-
+        this.ciclusCount = 0;
     }
 
 }

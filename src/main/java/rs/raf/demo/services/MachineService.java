@@ -75,8 +75,14 @@ public class MachineService implements IService<Machine, Long> {
 
         CronTrigger cronTrigger = new CronTrigger(cronExpression);
         this.taskScheduler.schedule(() -> {
-            System.out.println("stopping machine");
+            Integer ciclusCount = machine.getCiclusCount();
             machineRepository.updateMachineStatusToStopped(machine.getId());
+            machineRepository.updateMachineCiclusCount(machine.getId(), ++ciclusCount);
+            machine.setCiclusCount(ciclusCount);
+            System.out.println("counttt: " + ciclusCount);
+            if((machine.getCiclusCount()) % 3 == 0){
+                this.dischargeMachine(machine);
+            }
         }, cronTrigger);
     }
 
@@ -91,32 +97,22 @@ public class MachineService implements IService<Machine, Long> {
         this.taskScheduler.schedule(() -> {
             machineRepository.updateMachineStatusToDischarged(machine.getId());
         }, cronTrigger);
-
-        executionTime = executionTime.plusSeconds(15);
-        cronExpression = generateCronExpression(executionTime);
-        cronTrigger = new CronTrigger(cronExpression);
-
         this.taskScheduler.schedule(() -> {
-            machineRepository.updateMachineStatusToStopped(machine.getId());
+            this.stopMachine(machine);
         }, cronTrigger);
     }
 
     public void scheduleMachine(ScheduleDto schedule){
-//        Instant instant = schedule.getExecutionDateTime().toInstant();
-
         String cronExpression = generateCronExpression(schedule.getExecutionDateTime());
 
         CronTrigger cronTrigger = new CronTrigger(cronExpression);
-
-
 
         switch (schedule.getMachineOperation()){
             case START:
                 System.out.println("operation is: " + schedule.getMachineOperation());
                 this.taskScheduler.schedule(() -> {
                     System.out.println("in schedule is: " + schedule.getMachineOperation());
-                    machineRepository.updateMachineStatusToRunning(schedule.getMachine().getId());
-//                    this.startMachine((schedule.getMachine()));
+                    this.startMachine(schedule.getMachine());
                 }, cronTrigger);
                 break;
             case STOP:
@@ -136,7 +132,6 @@ public class MachineService implements IService<Machine, Long> {
                 return;
         }
     }
-
     public List<Machine> findByQuery(Query query){
         try {
             Date startDate = DateUtil.convertStringToDate(query.getDateFrom());
@@ -151,7 +146,7 @@ public class MachineService implements IService<Machine, Long> {
     }
 
     private String generateCronExpression(LocalDateTime dateTime) {
-        System.out.println("dateTimeeeeee: "  + dateTime);
+        System.out.println("dateTime: "  + dateTime);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ss mm HH dd MM ?");
         return dateTime.format(formatter);
     }
